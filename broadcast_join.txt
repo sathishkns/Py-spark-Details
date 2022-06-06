@@ -1,6 +1,6 @@
 from pyspark.sql.functions import broadcast
 
-replaceDf1 = df_snp.select(dfsnp_mins_df1).alias('a').join(broadcast(CASA_OPEN).alias('b'), on='ar_id_item', how='right').select('a.*','b.*')
+replaceDf1 = df.select(df_mins_df1).alias('a').join(broadcast(df_child).alias('b'), on='acct_id', how='right').select('a.*','b.*')
 
 #######
 
