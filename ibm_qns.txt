@@ -81,25 +81,3 @@ df=df.count(col1).alias('colcnt1') \
 	.groupBy(colcnt1,colcnt2) \
 	.having cnt >1\
 	.drop(colcnt1,colcnt2)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		
-
