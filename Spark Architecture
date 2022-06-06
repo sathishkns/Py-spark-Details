@@ -47,3 +47,12 @@ Spark on Yarn architecture in client mode:
 Spark on yarn architecture in cluster mode
 ===========================
 The only difference here is that the spark driver runs on the application master.
+
+1) when spark submit fires, it will choose node to launch the driver.
+2) the driver program will run on the node where application master is running
+spark application master will get started in any of the worker machines(Executors)
+3) Once driver is launched, it will communicate with YARN where to launch executors considering availability of resources on node
+4) Once executors are spinned up, driver will sent details like jar files, py files to each executor
+5) spark engine creates logical plan which will be converted to physical plan(DAG) during creation of stages
+6) multiple jobs created for each action and each shuffle operation creates new stage and inside each stage multiple task and run each tasks in executors
+7) Once each action inside spark app completed, it release the resources(drivers/executors)
