@@ -1,0 +1,49 @@
+Spark on Yarn Architecture:
+
+How does spark execute our programs on the cluster?
+==================================
+Master/Slave architecture 
+  
+Each application has driver which is the master process.   
+Each application has a bunch of executors which are the slave process.
+  Driver - is responsible for analyzing the work, divides the work in many tasks, distributes the task, schedules the task and monitors.  
+  Executor - is responsible to execute the code locally on that JVM (Executor machine)
+
+Who executes where?
+====================
+The executors are always launched on the cluster machines (worker nodes)
+
+However, for the driver we have the flexibility to launch it on the client machine or the cluster machines.
+   client mode 
+   cluster mode
+whenever the driver runs on client machine we say as client mode.
+whenever the driver runs on cluster or the executor we say as cluster mode.
+
+The preferred approach for production is the cluster mode.
+Client mode is not preferred because if the client machine goes down or is shut down then the driver stops.
+
+Who controls the cluster & how spark gets the driver and executor Cluster manager?
+===============
+YARN
+Mesos
+Kubernetes
+Spark Standalone
+
+What is a spark session:
+===============
+Is like a data structure where driver maintains all the information including executor location and status.
+This is the entry point for any spark application.
+
+Spark on Yarn architecture in client mode:
+==========================
+1. When we launch spark-shell automatically spark session is created
+2. As soon as spark session is created request goes to the Yarn resource manager.(Cluster manager)
+3. Yarn RM will create a container on one of the node manager and will launch an Application master for this spark application.
+4. This application Master will negotiate for resources from the Yarn Resource manager in for of containers.
+5. The Yarn RM will create containers on the node managers.
+6. Now the APP master will launch the executors in these containers.
+7. Now the drivers and executors can communicate directly without the involvement of containers.
+
+Spark on yarn architecture in cluster mode
+===========================
+The only difference here is that the spark driver runs on the application master.
