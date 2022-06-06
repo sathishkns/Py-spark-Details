@@ -1,3 +1,25 @@
+1) spark.conf.get('spark.sql.files.maxPartitionBytes') - The maximum number of bytes to pack into a single partition when reading files. Default is 128 MB
+>>> spark.conf.get("spark.sql.files.maxPartitionBytes")
+'134217728' ==134MB
+
+so file with 26Gb data will take ~192 partitions (26G/128M)
+
+NOTE: ~3x the number of partitions than available cores in cluster, to maximize parallelism along side with the overhead of spinning more executors
+
+2) spark.sql.files.minPartitionNum: The suggested (not guaranteed) minimum number of partitions when reading files // from spark 3.x version only
+
+3) >>> sc.defaultParallelism = 2 //which equals to two or the total number of cores in our cluster, whichever is bigger
+
+4) >>> spark.conf.get('spark.sql.shuffle.partitions')
+'200'
+
+5) >>> spark.conf.get('spark.sql.limit.scaleUpFactor')
+'4'
+
+6) spark.conf.get("spark.sql.autoBroadcastJoinThreshold")
+
+
+
 Optimal way to check if dataframe is empty
 Use the head function in place of count.
 
