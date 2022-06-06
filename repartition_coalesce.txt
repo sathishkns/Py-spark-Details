@@ -1,0 +1,133 @@
+##### Spark Partitions #####
+
+rdd = sc.parallelize(range(1,11))
+rdd.getNumPartitions()  // default 8 which is determined by, sc.defaultParallelism
+
+rdd.glom().collect()
+[[1], [2], [3], [4, 5], [6], [7], [8], [9, 10]]
+
+Since 8 partitions are present, 8 executors would be launched for this action, as shown below
+# of Executors = # of Partitions
+
+
+## File partitions
+
+df2 = spark.read.format('csv').options(delimiter=',', header=True).load('/path-to-file/population.csv')
+df2.rdd.getNumPartitions()
+
+1
+
+So how to control the number of bytes a single partition can hold ?
+
+The file being read here is of 3.6 MB, hence only 1 partition is created in this case.
+
+The no. of partitions is determined by spark.sql.files.maxPartitionBytes parameter, which is set to 128 MB, by default.
+
+spark.conf.get("spark.sql.files.maxPartitionBytes") # -> 128 MB by default
+'134217728'Bytes
+
+Note: The files being read must be splittable by default for spark to create partitions when reading the file. So, in case of compressed files like snappy, gz or lzo etc, a single partition is created irrespective of the size of the file.
+
+Let’s manually set the spark.sql.files.maxPartitionBytes to 1MB, so that we get 4 partitions upon reading the file.
+
+spark.conf.set("spark.sql.files.maxPartitionBytes", 1000000)
+spark.conf.get("spark.sql.files.maxPartitionBytes")
+'1000000'
+
+df3 = spark.read.format('csv').options(delimiter=',', header=True).load('/path-to-file/population.csv')
+df3.rdd.getNumPartitions()
+4
+
+#### why partitions needed ####
+
+spark distributes data among different nodes to thereby producing a distributed and parallel execution of the data with reduced latency
+
+
+### first method ####
+
+Method 1 : Repartition using Column Name
+Now let’s repartition our dataset using the first method using the column present in the dataframe and check the number of partitions being created after repartition.
+
+# df.printSchema()   #> root
+                     # |-- _1: long (nullable = true)
+
+df = df.repartition('_1')
+df.rdd.getNumPartitions()
+200
+
+After our repartition, 200 partitions are created by default. This is because of the value present in spark.sql.shuffle.partitions. Spark uses the value present here to create the number of partitions after the shuffle operation. By default, 200 partitions are created if the number is not specified in the repartition clause.
+
+spark.conf.get("spark.sql.shuffle.partitions")
+'200'
+
+Caution: Repartition performs a full shuffle on the input dataset, hence it would be a costly operation if done on large datasets.
+Note: Use Repartition only when you want to increase the number of partitions (or) if you want to perform a full shuffle on the data
+
+
+Method 2 : Repartition using integer value
+
+df = df.repartition(3)
+
+Suppose there are 100 partitions with 10 records in each partition, and if the partition size is reduced to 50, it would retain 50 partitions and append the other values to these existing partitions thereby having 20 records in each partition.
+
+NOTE: But the output data would not be equally partitioned.
+
+Caution: Even though coalesce seems to be useful when decreasing partitions, it also reduces the degree of parallelism when you want to partition your data. Example, if you do an extreme coalesce to 1 partition, then all the computation would take place on a single node which is not a good practice. In this case repartition can be used.
+
+
+###### IMPORTANT #######
+
+df4.coalesce(1).write.format('csv').mode('Overwrite').save('/path-to-file/sample1')
+
+For the above coalesce operation, all computation takes place on a single node and not utilizing the other ones. So, in a real world problem with a huge dataset, this would create a huge overhead on a single node thereby slowing down the process and degrading the performance
+
+
+df4.repartition(1).write.format('csv').mode('Overwrite').save('/path-to-file/sample2')
+
+For the above case, repartition first performs a full shuffle of the data. The data here resides in 8 partitions, so 8 executors are launched to perform the shuffle.
+
+After completion of shuffle, the data is placed into a single node described by the second stage. So, the save operation is distributed among the different executors. Performance wise this might increase the latency a bit depending on the number of partitions created, but the overhead on a single node would be avoided
+
+stage 1: 8/8 executors (Shuffle write)
+stage 2: 1/1 executors (Shuffle read)	
+
+Main difference:
+
+NOTE: The repartition method makes new partitions and evenly distributes the data in the new partitions (the data distribution is more even for larger data sets)
+coalesce results in partitions with different amounts of data (sometimes partitions that have much different sizes) and repartition results in roughly equal sized partitions.
+
+
+Partition A: 1, 3, 4, 6, 7, 9, 10, 12
+Partition B: 2, 5, 8, 11
+
+Partition A and Partition B are different sizes because the repartition algorithm doesn't distribute data as equally for very small data sets. I used repartition to organize 5 million records into 13 partitions and each file was between 89.3 MB and 89.6 MB - that's pretty equal!
+
+But also you should make sure that, the data which is coming coalesce nodes should have highly configured, if you are dealing with huge data. Because all the data will be loaded to those nodes, may lead memory exception
+
+
+##### Very Important ####
+
+There is a use-case for repartition >> coalesce even where the partition number decreases mentioned in @Rob's answer, that is writing data to a single file.
+
+@Rob's answer hints in the good direction, but I think that some further explanation is needed to understand what's going on under the hood.
+
+If you need to filter your data before writing, then repartition is much more suitable than coalesce, since coalesce will be pushed-down right before the loading operation.
+
+For instance: load().map(…).filter(…).coalesce(1).save()
+
+translates to: load().coalesce(1).map(…).filter(…).save()
+
+This means that all your data will collapse into a single partition, where it will be filtered, losing all parallelism. This happens even for very simple filters like column='value'.
+
+This does not happen with repartition: load().map(…).filter(…).repartition(1).save()
+
+In such case, filtering happens in parallel on the original partitions.
+
+Just to give an order of magnitude, in my case when filtering 109M rows (~105G) with ~1000 partitions after loading from a Hive table, the runtime dropped from the ~6h for coalesce(1) to ~2m for repartition(1).
+
+
+
+Simple Repartition
+A simple repartition is a repartition who’s only parameter is target sPartition count — IE: df.repartition(100). In this case, a round-robin partitioner is used, meaning the only guarantee is that the output data has roughly equally sized sPartitions
+
+Repartitioning by columns uses a HashPartitioner, which will assign records with the same value for the hash of their key to the same partition

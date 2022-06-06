@@ -1,0 +1,105 @@
+SELECT name,amount
+  sum(total) OVER(ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) 
+          AS RunningTotal
+  FROM Table
+
+
+Table A 	Table B
+col		col	
+1		1	
+1		1
+1		1
+		1
+		1
+
+
+list=[1,1,2,2,3]
+
+
+	
+list[set(list)]
+
+def remdups(lst):
+	res,s=[],set()
+	for e in lst:
+	        s.add(e)
+	        if e not in s:
+	                res.append(e)
+	return res
+
+table A 	table B
+1_1		1_1
+1_2		2_2
+1_3
+1_4
+1_5
+2
+3	
+
+
+from saikrishna (External) to everyone:    12:24 PM
+lst=['a',1,'b',2,'c',3,d]
+from saikrishna (External) to everyone:    12:24 PM
+d={'a':1,'b':2,'c':3,'d':''}
+
+chr_lst,num_lst
+
+for e in lst:
+	if e.isChar():
+		chr_lst.append(e)
+	else:
+		num_lst.append(e)
+
+print(chr_lst)
+print(num_lst)
+
+from itertools import defautldict
+d=defaultdict(list)
+
+
+for c,n in zipWithIndex(chr_lst,num_lst):
+	d[c]=n
+
+return d
+
+col
+aaabcb
+abcd
+
+df.withColumn("namewithaa").select(col("name").like("%aa"))
+
+
+col col2 col3 
+1	2	3
+4	2	5
+1	2	5
+6	7	9
+
+
+df=df.count(col1).alias('colcnt1') \
+	.count(col2).alias('colcnt2') \
+	.groupBy(colcnt1,colcnt2) \
+	.having cnt >1\
+	.drop(colcnt1,colcnt2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+

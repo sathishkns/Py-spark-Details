@@ -1,0 +1,321 @@
+# SQL find % increase in salary each year
+
++------+------+----------+----------+
+|emp_no|salary| from_date| to_date|
++------+------+----------+----------+
+| 10001| 60117|1986-06-26|1987-06-26|
+| 10001| 62102|1987-06-26|1988-06-25|
+| 10001| 66074|1988-06-25|1989-06-25|
+| 10001| 66596|1989-06-25|1990-06-25|
+| 10001| 66961|1990-06-25|1991-06-25|
+
+
+create table emp_sal(
+  emp_id int,
+  emp_sal int,
+  from_date date,
+  to_date date
+  );
+  
+insert into emp_sal(emp_id,emp_sal,from_date,to_date) values(1,100,'2010-01-01','2011-01-01');
+
+select emp_no,
+from_date,
+salary,
+prev_salary,
+round(((1 - prev_salary/salary) * 100),2) as change
+from (select emp_no,
+from_date,
+salary,
+lag(salary,1,salary) over (partition by emp_no order by from_date) as prev_salary
+from salaries_t) a
+where emp_no = 10001;
+
+With cte as (
+Select a.emp_no, a.salary, a.from_date, b.salary as prev_salary
+From salary_t a
+Left join salary_t b
+On(a.emp_no = b.emp_no and a.from_date = b.to_date) )
+
+Select emp_no, salary, from_date,
+(salary - prev_salary)/(prev_salary/100) as per_change
+From cte
+
+
+#pyspark code
+
+from pyspark.sql.window import Window
+from pyspark.sql.functions import lag,col,when,round
+
+windowSpec = Window.partitionBy("emp_no").orderBy("emp_no")
+win_logic ="lag((df.salary),1).over(windowSpec)"
+df = df.withColumn("prev_salary",when(isnull(eval(win_logic)),col('salary')).otherwise(eval(win_logic)))
+df.withColumn('raise per year',round((col('salary')-col('prev_salary'))*100/col('prev_salary'),2)).show()
+
+
+####
+
+df.select("firstname")
+df.select(df["firstname"])
+df.select(df.firstname)
+
+from pyspark.sql.functions import col
+
+df.select(col("firstname"))
+
+df.select([col for col in df.columns])
+df.select('*').show()
+
+df.select(df.columns[:3]).show()
+
+name             
++---------------
+|[James,, Smith]
+
+df.select("name")
+df.select("name.firstname","name.lastname")
+df.select("name.*")
+
+hive_managed_path=hdfs://rasperf1/warehouse/tablespace/managed/hive/
+
+
+#Reading orc files from managed path - base and delta , data results duplicates while reading them ;  Added duplicates removal logic if any.
+
+temp_window  			=    Window.partitionBy('cdceo_id','cdceo_payload').orderBy(df1.cdcei_consumer_time.desc())
+df1=    df1.withColumn("row_no",row_number().over(temp_window)).filter(col('row_no')==1).drop("row_no")
+
+
+
+#### Replace space with underscore ####	
+
+new_column_name_list= list(map(lambda x: x.replace(" ", "_"), df.columns))
+df = df.toDF(*new_column_name_list)
+
+
+If you want to rename a single column and keep the rest as it is:
+
+from pyspark.sql.functions import col
+new_df = old_df.select(*[col(s).alias(new_name) if s == column_to_change else s for s in old_df.columns])
+
+
+for c,n in zip(df.columns,newcolnames):
+    df=df.withColumnRenamed(c,n)
+	
+	
+def renameCols(df, old_columns, new_columns):
+    for old_col,new_col in zip(old_columns,new_columns):
+        df = df.withColumnRenamed(old_col,new_col)
+    return df
+
+old_columns = ['old_name1','old_name2']
+new_columns = ['new_name1', 'new_name2']
+df_renamed = renameCols(df, old_columns, new_columns)
+
+Another way to rename just one column (using import pyspark.sql.functions as F):
+
+df = df.select('*', F.col('count').alias('new_count') ).drop('count')
+
+# create spark dataframe
+
+https://sparkbyexamples.com/pyspark/different-ways-to-create-dataframe-in-pyspark/
+
+list_data=[["Babu",20],["Raja",8],["Mani",75],["Kalam",100],["Zoin",7],["Kal",53]]
+df1=spark.createDataFrame(list_data,["name","score"])
+df1.show()
+
+
+from pyspark.sql.functions import format_string
+df2=df1.withColumn("score_000",format_string("%03d","score"))
+
+from pyspark.sql.functions import lpad
+df2=df1.withColumn("score_000",lpad("score",3,"0"))
+
+from pyspark.sql.functions import lit,substring,concat
+df2=df1.withColumn("score_000",concat(lit("00"),"score"))
+df3=df2.withColumn("score_000",substring("score_000",-3,3))
+
+
+
+# replace in pyspark
+
+from pyspark.sql.functions import col,when,lit
+df1.withColumn("card_type_repl",when(col("Card_type").rlike("Checking"),lit("Cash")).otherwise(col("Card_type")))
+
+na_replace_df=df1.na.replace("Checking","Cash")
+
+#regexp_replace
+
+withColumn('acctOpenDtl_pubArBscDtl_acctTtl',regexp_replace(F.col("acctOpenDtl_pubArBscDtl_acctTtl"),"\\]","")
+
+
+# dataframe with filename
+
+from pyspark.sql.functions import input_file_name
+df.withColumn("file_name",input_file_name())
+
+# get null column from dataframe
+
+date = ['2016-03-27','2016-03-28','2016-03-29', None, '2016-03-30','2016-03-31']
+df = spark.createDataFrame(date, StringType())
+
+df.where(col("dt_mvmt").isNull())
+df.where(col("dt_mvmt").isNotNull())
+
+df.filter(df.<col_name>.isNotNull()).count()
+
+
+#convert spark df to pandas df
+
+In my case the following conversion from spark dataframe to pandas dataframe worked:
+
+pandas_df = spark_df.select("*").toPandas()
+
+# without index
+
+print(pandasdf.to_string(index=False))
+
+# create empty RDD
+
+emptyRDD = sc.emptyRDD()
+
+>>> spark.range(0).show()
++---+
+| id|
++---+
++---+
+
+
+sparkSession.createDataFrame([("99","99")], ["col1","col2"])
+
+schema = StructType([
+  StructField('firstname', StringType(), True),
+  StructField('middlename', StringType(), True),
+  StructField('lastname', StringType(), True)
+  ])... ... ... ...
+>>>
+>>>
+>>>
+>>>
+>>> df=spark.createDataFrame(sc.emptyRDD(),schema)
+>>> df.show()
++---------+----------+--------+
+|firstname|middlename|lastname|
++---------+----------+--------+
++---------+----------+--------+
+
+
+>>> spark.createDataFrame([],schema).show()
++---------+----------+--------+
+|firstname|middlename|lastname|
++---------+----------+--------+
++---------+----------+--------+
+
+
+
+##replace
+
+df.na.replace("value","valuetoreplace")
+
+using case when
+
+df.withColumn("replaceval", when(col("type").like("check"),lit("cash")).otherwise(col("type"))
+
+
+## infer schema vs structType
+
+df = spark.read.option("header", True) \
+  .option("delimiter", "|") \
+  .option("inferSchema", True) \
+  .csv(file_location)
+  
+ time taken: 1.75seconds
+ 
+ predefined schema: 0.45seconds
+ 
+ 
+###
+
+FAILFAST - (Malformed records are detected in schema inference. Parse Mode: FAILFAST) - It is mandatory that all records should be correct and there should not be skip or redirect any corrupt records. Spark will throw an exception and job fails
+
+JsonParseException: Unexpected character ('p' (code 112)): was expecting comma to separate Object entries
+
+PERMISSIVE - process both correct and corrupted records
+
+Malformed records are detected in schema inference. Parse Mode: FAILFAST
+
+	df=spark.read.option("multiLine", True).option("mode", ws_mode).option("columnNameOfCorruptRecord", "_corrupt_record").json(df.select("cdceo_payload").rdd.map(lambda r: r.cdceo_payload))
+				if ws_mode != "DROPMALFORMED":
+					print("Corrupted json count **************************** - " + str(df.filter(col("_corrupt_record").isNotNull()).count()))
+					print(df.select("_corrupt_record").filter(col("_corrupt_record").isNotNull()).show(truncate=False))
+
+
+
+DROPMALFORMED - ignores corrupted record ("Ignored corrupted json and proceeding the process)
+
+### 
+using alias in dataframe
+
+df_recon_source.select(col("value").alias("cdceo_payload"),col("jsonData.type").alias("evt_type"))
+
+Window.partitionBy('cdceo_id','cdceo_payload').orderBy(df1.cdcei_consumer_time.desc())
+df1=    df1.withColumn("row_no",row_number().over(temp_window)).filter(col('row_no')==1).drop("row_no")
+
+##
+rdd.map(lambda x:x[0]).collect()
+
+
+
+### remove duplicates in dataframe ####
+
+
+PySpark distinct() function is used to drop/remove the duplicate rows (all columns) from DataFrame.
+
+distinctDF = df.distinct()
+df2 = df.dropDuplicates()
+
+dropDuplicates() is used to drop rows based on selected (one or multiple) columns. function which takes multiple columns to eliminate duplicates
+dropDisDF = df.dropDuplicates(["department","salary"])
+
+
+from pyspark.sql.functions import col
+df = df.withColumn('colName',col('colName').cast('string'))
+
+df.drop_duplicates(subset=['colName']).count()
+can use a sorted groupby to check to see that duplicates have been removed:
+
+df.groupBy('colName').count().toPandas().set_index("count").sort_index(ascending=False)
+
+>>> df.groupBy('email').count().toPandas().set_index("count").sort_index(ascending=False)
+                 email
+count
+3      suraz@gmail.com
+>>>
+
+
+### dups check ###
+
+
+>>> dfnew=df.groupBy('email').agg(count('email').alias('dups')).show()
++---------------+----+
+|          email|dups|
++---------------+----+
+|suraz@gmail.com|   3|
++---------------+----+
+
+
+## drop dups using row_number
+
+winSpec=Window.partitionBy("ar_id_item").orderBy(df.prcs_date.desc())
+df=df.withColumn("row_no",row_number().over(winSpec)).filter(col("row_no")==1).drop("row_no")
+
+
+## inner join on dataframe ###
+
+emp_df  = spark.read.csv('Employees.csv', header =True);
+dept_df = spark.read.csv('dept.csv', header =True)
+
+
+emp_dept_df = emp_df.join(dept_df,'DeptID').select(emp_df['*'], dept_df['Name'].alias('DName'))
+emp_df.show()
+dept_df.show()
+emp_dept_df.show()

@@ -1,0 +1,7 @@
+In other words those spark-submit parameters (we have an Hortonworks Hadoop cluster and so are using YARN):
+
+–executor-memory MEM – Memory per executor (e.g. 1000M, 2G) (Default: 1G).
+–executor-cores NUM – Number of cores per executor. (Default: 1 in YARN mode, or all available cores on the worker in standalone mode)
+–num-executors NUM – Number of executors to launch (Default: 2). If dynamic allocation is enabled, the initial number of executors will be at least NUM.
+
+Spark dynamic allocation is a feature allowing your Spark application to automatically scale up and down the number of executors. And only the number of executors not the memory size and not the number of cores of each executor that must still be set specifically in your application or when executing spark-submit command. So the promise is your application will dynamically be able to request more executors and release them back to cluster pool based on your application workload. Of course if using YARN you will be tightly linked to the ressource allocated to the queue to which you have submitted your application

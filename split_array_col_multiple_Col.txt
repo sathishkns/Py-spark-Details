@@ -1,0 +1,28 @@
+>>> data
+[('e1', ['d1', 'd2', 'd3']), ('e2', ['d11', 'd12']), ('e3', ['d21', 'd22', 'd23', 'd24']), ('e4', ['d31'])]
+schema = StructType([ 
+    StructField("id",StringType(),True), 
+    StructField("dept",ArrayType(StringType()),True)])
+	
+	
+>>> df_max_col=df_get_col_size.agg(*[F.max(col).alias(col) for col in df_drop_id_cols])
+>>> max_dict=df_max_col.collect()[0].asDict()
+
+>>> res=df.select('id',*[df[col][i] for col in df_drop_id_cols for i in range(max_dict[col])])
+>>> res.show()
++---+-------+-------+-------+-------+
+| id|dept[0]|dept[1]|dept[2]|dept[3]|
++---+-------+-------+-------+-------+
+| e1|     d1|     d2|     d3|   null|
+| e2|    d11|    d12|   null|   null|
+| e3|    d21|    d22|    d23|    d24|
+| e4|    d31|   null|   null|   null|
++---+-------+-------+-------+-------+
+
+
+References:
+
+https://stackoverflow.com/questions/51648313/split-large-array-columns-into-multiple-columns-pyspark
+https://stackoverflow.com/questions/45789489/how-to-split-a-list-to-multiple-columns-in-pyspark
+https://stackoverflow.com/questions/49650907/split-column-of-list-into-multiple-columns-in-the-same-pyspark-dataframe
+https://stackoverflow.com/questions/56091524/how-to-find-the-max-string-length-of-a-column-in-spark-using-dataframe

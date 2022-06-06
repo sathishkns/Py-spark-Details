@@ -1,0 +1,32 @@
+Datasets
+
+Starting in Spark 2.0, Dataset takes on two distinct APIs characteristics: 
+
+a strongly-typed API and an untyped API.
+
+DataFrame = DataSet[Row] // Distributed collection of Row Object
+
+Conceptually, consider DataFrame as an alias for a collection of generic objects Dataset[Row], where a Row is a generic untyped JVM object. 
+Dataset, by contrast, is a collection of strongly-typed JVM objects, dictated by a case class you define in Scala or a class in Java.
+
+a dataset is a type safe structured api. So you can provide type of your schema beforehand
+
+take example in dataframe syntax df.filter("age > 21"); 
+
+this can be evaluated/analyzed at only run time. since its string. 
+
+Incase of Datasets, Datasets are bean compliant. so age is bean property. if age property is not there in your bean, then you will come to know early in the i.e. compile time(i.e dataset.filter(_.age < 21);
+
+Dataset API is an extension to DataFrames that provides a type-safe, object-oriented programming interface
+
+Dataset are dataframe to which we associate an "encoder" related to a jvm class. So spark can check that the data schema is correct before executing the code
+
+Scenarios:
+
+There are a few scenarios where I find that a Dataframe (or Dataset[Row]) is more useful than a typed dataset.
+
+For example, when I'm consuming data without a fixed schema, like JSON files containing records of different types with different fields. Using a Dataframe I can easily "select" out the fields I need without needing to know the whole schema, or even use a runtime configuration to specify the fields I'll access
+
+Another consideration is that Spark can better optimize the built-in Spark SQL operations and aggregations than UDAFs and custom lambdas
+
+You need to define a new case class whenever you change the Dataset schema, which is cumbersome

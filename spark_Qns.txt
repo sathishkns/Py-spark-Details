@@ -1,0 +1,69 @@
+# citi ###
+
+0) spark submit command
+1) various deployment modes
+2) spark query to select some columns from csv file and write to hive
+3) accumulators and broadcast variables
+4) repartition and coalesce
+5) create external table to read parquet file and write
+6) various issues while doing spark submit
+7) sparksql vs hive
+8) how many stages will be created for each transformation
+
+### HCL ###
+
+1) groupby, reducebykey
+2) map and mapPartitionRDD
+3) map and flatmap
+4) max salary without using rank()
+5) repartittion/coalesce
+6) when spark throw error? read file,apply filter and count
+7) how many stages for read file, filter and map and count
+8) dataframe and dataset
+9) select * from table; hive query how many mapper and reducer will have
+10) broadcast and cache. when to use?
+11) narrow and wide tfn? example of each
+12) various joins used
+
+
+#### Deloitte ###
+
+1) how you are polling kafka topic and read messages
+2) diff bn tempView and globalTempView
+3) recursive fun in python (sum of numbers in list)
+4) window function (lag,lead)
+5) Salting technique for two skewed dataframes
+6) left anti join
+7) can we have multiple spark session while reading data from jdbc
+
+
+
+##### comcast ####
+
+1) read csv file and apply rank on top of to find nth record
+2) python function to return missing number in list
+3) diff b/n RDD and dataframe
+4) diff parameters you will pass for sparkSession
+5) if memory is only 10G and i want to read 100G file. How?
+6) find duplicate rows in dataframe and remove
+6) read gzip file in spark
+	df=spark.read.csv("/path/file.csv.gz",sep='\t')
+	
+	The only extra consideration to take into account is that the gz file is not splittable, therefore Spark needs to read the whole file using a single core which will slow things down. After the read is done the data can be shuffled to increase parallelism
+	
+	
+All of Spark’s file-based input methods, including textFile, support running on directories, compressed files, and wildcards as well. For example, you can use textFile("/my/directory"), textFile("/my/directory/.txt"), and textFile("/my/directory/.gz").
+
+I'd suggest running the following command, and see the result:
+
+rdd = sc.textFile("data/label.gz")
+
+print rdd.take(10)
+
+
+You can load compressed files directly into dataframes through the spark instance, you just need to specify the compression in the path:
+
+df = spark.read.csv("filepath/part-000.csv.gz") 
+You can also optionally specify if a header present or if schema needs applying too
+
+df = spark.read.csv("filepath/part-000.csv.gz", header=True, schema=schema).

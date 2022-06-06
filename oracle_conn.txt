@@ -1,0 +1,13 @@
+import cx_Oracle
+import pandas as pd
+
+con = cx_Oracle.connect(user=globalConf.con_oruidDEP, password=globalConf.con_orpwdDEP, dsn=globalConf.con_orDBQ,encoding="UTF-8")
+cur=con.cursor()
+cur.prefetchrows	=	20000000
+cur.arraysize			=	4000000
+df=pd.read_sql_query (query, connection_dep)
+
+import pyodbc
+con = pyodbc.connect(globalConf.oracle_con_rd_str)
+cur=con.cursor()
+return con,cur

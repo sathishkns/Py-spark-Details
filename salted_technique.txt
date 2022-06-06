@@ -1,0 +1,82 @@
+data=[(1,"a"),(2,"b"),(1,"c"),(1,"x"),(1,"y"),(1,"g"),(1,"k"),(1,"u"),(1,"n")]
+df=spark.createDataFrame(data,["id","name"])
+df.createOrReplaceTempView("fact")
+spark.sql("select * from fact").show()
+
+data1=[(1,10),(2,30),(3,40)]
+df1=spark.createDataFrame(data1,["id","salary"])
+df1.createOrReplaceTempView("dim")
+spark.sql("select * from dim").show()
+
+
+salted_df=spark.sql("select concat(id,'_',FLOOR(RAND(123456)*19)) as salted_key,name from fact")
+salted_df.createOrReplaceTempView("salted_fact")
+spark.sql("select * from salted_fact").show()
+
+
++----------+----+
+|salted_key|name|
++----------+----+
+|       1_9|   a|
+|      2_15|   b|
+|       1_7|   c|
+|       1_0|   x|
+|       1_4|   y|
+|      1_17|   g|
+|       1_9|   k|
+|      1_15|   u|
+|      1_10|   n|
++----------+----+
+
+
+exploded_dim_df = spark.sql("select id, salary, explode(array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19)) as salted_key from dim")
+exploded_dim_df.createOrReplaceTempView("salted_dim")
+spark.sql("select * from salted_dim").show()
+
++---+------+----------+
+| id|salary|salted_key|
++---+------+----------+
+|  1|    10|         0|
+|  1|    10|         1|
+|  1|    10|         2|
+|  1|    10|         3|
+|  1|    10|         4|
+|  1|    10|         5|
+|  1|    10|         6|
+|  1|    10|         7|
+|  1|    10|         8|
+|  1|    10|         9|
+|  1|    10|        10|
+|  1|    10|        11|
+|  1|    10|        12|
+|  1|    10|        13|
+|  1|    10|        14|
+|  1|    10|        15|
+|  1|    10|        16|
+|  1|    10|        17|
+|  1|    10|        18|
+|  1|    10|        19|
++---+------+----------+
+
+result_df = spark.sql("select split(fact.salted_key, '_')[0] as ID, fact.name,dim.salary from salted_fact fact LEFT JOIN salted_dim dim ON fact.salted_key = concat(dim.ID, '_', dim.salted_key)").show()
++---+----+------+
+| ID|name|salary|
++---+----+------+
+|  1|   y|    10|
+|  1|   n|    10|
+|  1|   u|    10|
+|  1|   x|    10|
+|  1|   c|    10|
+|  2|   b|    30|
+|  1|   a|    10|
+|  1|   k|    10|
+|  1|   g|    10|
++---+----+------+
+
+
+References:
+
+1) https://stackoverflow.com/questions/40373577/skewed-dataset-join-in-spark?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+2) https://cwiki.apache.org/confluence/display/Hive/Skewed+Join+Optimization
+3) 
+

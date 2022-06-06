@@ -1,0 +1,17 @@
+from pyspark.sql.functions import broadcast
+
+replaceDf1 = df_snp.select(dfsnp_mins_df1).alias('a').join(broadcast(CASA_OPEN).alias('b'), on='ar_id_item', how='right').select('a.*','b.*')
+
+#######
+
+Spark broadcast joins are perfect for joining a large DataFrame with a small DataFrame.Broadcast joins cannot be used when joining two large DataFrames.
+
+* If both of the tables are huge then using the broadcast hash join on them is not a good strategy.Because both huge tables cannot sit in a single machine & they have to be distributed into the partitions & put into multiple machines.
+
+* If both the tables are < 10 MB, then the Smaller table should be last of the join and that will be broadcasted
+
+it broad casts which ever table defined latter in the query and that table size should be in the limit of the configuration mentioned.
+
+* In broad cast hash join, full copy of the small DF will be sent to each executor. If that small DF does not fit into the executor’s RAM, then it will lead to OOM errors.
+
+* If Broadcast Hash join throws OOM issues, we can Increase the storage memory of executors. You cannot increase specific ones, it’s Increasing the memory of all executors

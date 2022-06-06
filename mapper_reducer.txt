@@ -1,0 +1,53 @@
+<property>
+    <name>mapred.reduce.tasks</name>
+    <value>-1</value>
+  </property>
+  
+  
+# Number of reducers depends also on size of the input file
+<property>
+    <name>hive.exec.reducers.bytes.per.reducer</name>
+    <value>67108864</value>
+  </property>
+
+
+
+0: jdbc:hive2://vlmazrasdev1ap1.fisdev.local:> select count(distinct ar_id_item) from rt_apd_ar_mstr_dp_rd;
+
+INFO  : TaskCounter_Reducer_3_OUTPUT_out_Reducer_3:
+----------------------------------------------------------------------------------------------
+        VERTICES      MODE        STATUS  TOTAL  COMPLETED  RUNNING  PENDING  FAILED  KILLED
+----------------------------------------------------------------------------------------------
+Map 1 .......... container     SUCCEEDED      2          2        0        0       0       0
+Reducer 2 ...... container     SUCCEEDED      2          2        0        0       0       0
+Reducer 3 ...... container     SUCCEEDED      1          1        0        0       0       0
+----------------------------------------------------------------------------------------------
+VERTICES: 03/03  [==========================>>] 100%  ELAPSED TIME: 10.24 s
+----------------------------------------------------------------------------------------------
++------+
+| _c0  |
++------+
+| 20   |
++------+
+
+
+select count(*) from(select distinct ar_id_item from rt_apd_ar_mstr_dp_rd)a;
+
+INFO  : TaskCounter_Reducer_3_OUTPUT_out_Reducer_3:
+----------------------------------------------------------------------------------------------
+        VERTICES      MODE        STATUS  TOTAL  COMPLETED  RUNNING  PENDING  FAILED  KILLED
+----------------------------------------------------------------------------------------------
+Map 1 .......... container     SUCCEEDED      2          2        0        0       0       0
+Reducer 2 ...... container     SUCCEEDED      2          2        0        0       0       0
+Reducer 3 ...... container     SUCCEEDED      1          1        0        0       0       0
+----------------------------------------------------------------------------------------------
+VERTICES: 03/03  [==========================>>] 100%  ELAPSED TIME: 5.96 s
+----------------------------------------------------------------------------------------------
++------+
+| _c0  |
++------+
+| 20   |
++------+
+1 row selected (7.237 seconds)
+0: jdbc:hive2://vlmazrasdev1ap1.fisdev.local:>
+

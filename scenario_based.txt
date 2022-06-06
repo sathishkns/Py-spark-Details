@@ -1,0 +1,56 @@
+# scenario based questions
+
+1) # https://github.com/pcbzmani/Learning-repository-for-scala-and-pyspark/blob/main/Solutions/Python/1.access_solution.py
+
+data=[("1123","Y","Y","N","N"),("1235","Y","Y","Y","N"),("1125","N","N","N","Y"),("5891","Y","N","N","N"),("2225","N","Y","N","N")]
+df=spark.createDataFrame(data,["empid","dev","int","rel","prod"])
+
+dfdev=df.filter(df['dev']=="Y")
+dfint=df.filter(df['int']=="Y")
+dfrel=df.filter(df['rel']=="Y")
+dfprod=df.filter(df['prod']=="Y")
+
+dfdev=dfdev.withColumn("access",lit('development'))
+dfint=dfint.withColumn("access",lit('integration'))
+dfrel=dfrel.withColumn("access",lit('release'))
+dfprod=dfprod.withColumn("access",lit('production'))
+
+finaldf=dfdev.union(dfint).union(dfrel).union(dfprod)
+finaldf.select("empid","access").show()
+
+2) https://github.com/pcbzmani/Learning-repository-for-scala-and-pyspark/blob/main/Solutions/Python/2.error_solution.py
+
+data=[("BloodGroup","Login Error","Pageload Error"),("BMI Calc","Page Error","Precision Error")]
+
+# App Error
+appDF = df.drop('WebError')
+appDF = appDF.withColumnRenamed('AppError','Error')
+
+# Web Error
+webDF = df.drop('AppError')
+webDF = webDF.withColumnRenamed('WebError','Error')
+
+#Union two DF
+finalDF=appDF.union(webDF)
+
+finalDF.orderBy('Application').show()
+
+3) https://github.com/pcbzmani/Learning-repository-for-scala-and-pyspark/blob/main/Solutions/Python/3.Truthtable.py
+
+data=[("0"),("1")]
+df=spark.createDataFrame(data,StringType())
+OR
+lst=map(lambd x : Row(x),data)
+df=spark.createDataFrame(lst,["flag"])
+
+df1=df.withColumnRenamed("flag","flag1")
+df2=df.withColumnRenamed("flag","flag2")
+>>>
+>>>
+>>> finaldf=df.crossJoin(df1).crossJoin(df2)
+
+
+4) 
+
+data=[(1,["A1","B1","C1","A1"]),(2,["A1","A1"])]
+

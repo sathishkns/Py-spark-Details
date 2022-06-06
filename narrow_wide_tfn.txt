@@ -1,0 +1,23 @@
+https://sparkbyexamples.com/apache-spark-rdd/spark-rdd-transformations/
+
+
+Narrow Transformations:
+
+These types of transformations convert each input partition to only one output partition
+This kind of transformation is basically fast.
+Does not require any data shuffling over the cluster network or no data movement.
+Operation of map()and filter() belongs to this transformations
+
+RDD1			RDD2
+P1				P1
+P2				P2
+.				.
+Pn				Pn
+
+
+Wide Transformations:
+
+This type of transformation will have input partitions contributing to many output partitions. When each partition at the parent RDD is used by multiple partitions of the child RDD.
+
+Slow as compare to narrow dependencies speed might be significantly affected as it might be required to shuffle data around different nodes when creating new partitions.
+Functions such as groupByKey(), aggregateByKey(), aggregate(), join(), repartition() are some examples of wider transformations

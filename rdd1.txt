@@ -1,0 +1,61 @@
+emp = [(1,"Smith",-1,"2018","10","M",3000), \
+    (2,"Rose",1,"2010","20","M",4000), \
+    (3,"Williams",1,"2010","10","M",1000), \
+    (4,"Jones",2,"2005","10","F",2000), \
+    (5,"Brown",2,"2010","40","",-1), \
+      (6,"Brown",2,"2010","50","",-1) \
+  ]
+empColumns = ["emp_id","name","superior_emp_id","year_joined", \
+       "emp_dept_id","gender","salary"]
+
+empDF = spark.createDataFrame(data=emp, schema = empColumns)
+empDF.printSchema()
+empDF.show(truncate=False)
+
+
+data2 = [("James","","Smith","36636","M",3000,"1234567890123456"),("Michael","Rose","","40288","M",4000,None),("Robert","","Williams","42114","M",4000,"12345678901234"),("Maria","Anne","Jones","39192","F",4000,"123"),("Jen","Mary","Brown","","F",456789,"12345")]
+schema = StructType([ \
+    StructField("firstname",StringType(),True), \
+    StructField("middlename",StringType(),True), \
+    StructField("lastname",StringType(),True), \
+    StructField("id", StringType(), True), \
+    StructField("gender", StringType(), True), \
+    StructField("salary", IntegerType(), True), \
+	StructField("acct_num", StringType(), True)\
+  ])
+  
+  
+weather = [("chennai",2021,43),("delhi",2022,42),("chennai",2022,44)]
+schem=["city","year","temp"]
+
+>>> myrdd=sc.parallelize([data])
+>>> myrdd
+ParallelCollectionRDD[14] at parallelize at PythonRDD.scala:195
+
+
+myrdd=sc.parallelize(data)
+
+df = spark.createDataFrame([("foo", 1), ("bar", 2)])
+
+
+>>> cols=['empid','empname','dept']
+>>> data=[('1','sathish','RAS'),('2','satz','CAPE')]
+>>>
+>>>
+>>> from pyspark import SparkConf
+>>> from pyspark.sql import SparkSession
+>>> sparkSession=SparkSession.builder.master('local').getOrCreate()
+>>> sc=sparkSession.sparkContext
+>>> sc
+<SparkContext master=yarn appName=PySparkShell>
+>>> rdd=sc.parallelize(data)
+>>> rdd
+ParallelCollectionRDD[0] at parallelize at PythonRDD.scala:195
+>>> df=rdd.toDF(cols)
+>>> df.show()
++-----+-------+----+
+|empid|empname|dept|
++-----+-------+----+
+|    1|sathish| RAS|
+|    2|   satz|CAPE|
++-----+-------+----+

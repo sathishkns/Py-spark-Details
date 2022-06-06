@@ -1,0 +1,29 @@
+1) create readStream from spark with configuration parameters and load
+	df=spark.readStream.format("kafka")\
+		.option("kafka_details",topic_name)\
+		.load()
+
+2) make sure streaming is enabled using isStreaming()
+	df.isStreaming() // return True or False
+
+3) start reading messages and create foreachBatch to write
+	query=df.writeStream.foreachBatch(upsertdeltalogic)
+	upsertToDelta(microBatchOutputDF, batchId):
+	try:
+		print('Batch ID:'+str(batchId))
+		microBatchOutputDF.persist()
+		microBatchOutputDF = microBatchOutputDF.withColumn('value',col("value").cast("string"))
+
+4) You also must put the epoch_id or batch_id into the function parameters
+
+5) finally write to hdfs path to load to external table
+
+df1.repartition(1).write.format('com.databricks.spark.csv') \
+							.mode ("overwrite") \
+							.options(header='false') \
+							.option('delimiter','|') \
+							.option("ignoreLeadingWhiteSpace","false") \
+							.option("ignoreTrailingWhiteSpace","false") \
+							.option("quote", "\u0000") \
+							.option("timestampFormat","yyyy-MM-dd HH:mm:ss.SSS") \
+							.save(filepath)

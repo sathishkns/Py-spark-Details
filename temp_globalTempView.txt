@@ -1,0 +1,30 @@
+1) tempView or globalTempView will be applicable only for current spark session
+
+If you want to have a temporary view that is shared among all sessions and keep alive until the Spark application terminates, you can create a global temporary view
+
+Temporary views in Spark SQL are session-scoped and will disappear if the session that creates it terminates. 
+
+Global temporary view is tied to a system preserved database global_temp, and we must use the qualified name to refer it,
+
+df.createGlobalTempView("people")
+spark.sql("select * from global_temp.people").show()
+
+
+spark._jsparkSession.catalog().tableExists('foo')
+True
+>>> spark._jsparkSession.catalog().tableExists('glob_fact')
+False
+>>> table_list=spark.sql("show tables in racq21")
+DataFrame[database: string, tableName: string, isTemporary: boolean]
+>>> table_list.show()
+
+
+>>> table_list=spark.sql("show tables in global_temp")
+>>> table_list.show()
++-----------+---------+-----------+
+|   database|tableName|isTemporary|
++-----------+---------+-----------+
+|global_temp|glob_fact|       true|
+|           |      foo|       true|
++-----------+---------+-----------+
+

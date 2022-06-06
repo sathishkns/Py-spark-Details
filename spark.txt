@@ -1,0 +1,18 @@
+0) spark submit command
+1) various deployment modes
+2) spark query to select some columns from csv file and write to hive
+3) accumulators and broadcast variables
+4) repartition and coalesce
+5) create external table to read parquet file and write
+6) various issues while doing spark submit
+7) sparksql vs hive
+8) how many stages will be created for each transformation
+
+from pyspark.sql import SparkSession
+from pyspark_llap import HiveWarehouseSession
+
+sparkSession=SparkSession.builder.master('local').config(conf=conf).enableHiveSupport().getOrCreate
+
+hiveSess=HiveWarehouseSession.session(sparkSession).build()
+
+resSet=hiveSess.execute("select * from 1");

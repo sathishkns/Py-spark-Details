@@ -1,0 +1,279 @@
+
+Property_ID|Location|Price|Bedrooms|Bathrooms|Size|Price_SQ_FT|Status
+1461262|Arroyo Grande|795000|3|3|2371|365.3|Short Sale
+1478004|Paulo Pablo|399000|4|3|2818|163.59|Short Sale
+1486551|Paulo Pablo|545000|4|3|3032|179.75|Short Sale
+1492832|Santa Bay|909000|4|4|3540|286.78|Short Sale
+1499102|Thomas Country|109900|3|1|1249|98.99|Short Sale
+1489132|Thomas Country|109000|2|1|1129|93.99|Short Sale
+1467262|Fort Worth|987000|4|3|2771|465.3|Short Sale
+1478114|Paulo Pablo|409000|4|3|2918|223.19|Short Sale
+1402551|Nashville|545000|4|3|2932|169.75|Short Sale
+1405832|San Jose|980000|4|4|3340|290.98|Short Sale
+1493302|Fort Worth|119900|3|2|2249|198.99|Short Sale
+1412332|Thomas Country|129000|3|2|1329|73.99|Short Sale
+1469062|Arroyo Grande|798000|3|4|2321|235.9|Short Sale
+1498004|Nashville|789000|4|3|2419|263.59|Short Sale
+1586751|Nashville|896000|4|3|3132|199.75|Short Sale
+1433232|Glendale|987000|4|4|3340|216.78|Short Sale
+1495502|Fort Worth|219900|3|2|987|200.99|Short Sale
+1489100|San Jose|107200|1|1|789|78.99|Short Sale
+
+>>> sparkSession=SparkSession.builder.master('local').appName('test').getOrCreate()
+>>> sc=sparkSession.sparkContext
+>>> rdd=sc.textfile('/data/rdd.txt')
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: 'SparkContext' object has no attribute 'textfile'
+>>> rdd=sc.textFile('/data/rdd.txt')
+>>> rdd.show()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: 'RDD' object has no attribute 'show'
+>>> rdd.take(2)
+['Property_ID|Location|Price|Bedrooms|Bathrooms|Size|Price_SQ_FT|Status', '1461262|Arroyo Grande|795000|3|3|2371|365.3|Short Sale']
+
+>>> rdd.first()
+'Property_ID|Location|Price|Bedrooms|Bathrooms|Size|Price_SQ_FT|Status'
+>>>
+
+
+
+# Filter out first column of the header
+filterDD = contentRDD.filter(lambda l: not l.startswith(<first column name>)
+
+# Check your result
+for i in filterDD.take(5) : print (i)
+
+>>> first_col=''
+first_col+=rdd.first().split('|')[0]
+>>> first_col
+'Property_ID'
+>>>
+
+rdd1=rdd.filter(lambda x: not x.startswith(first_col))
+rdd2=rdd1.flatMap(lambda x:x.split(',')).map(lambda x:x.split('|'))
+
+
+col_index=[]
+>>> for cols in rdd.first().split('|'):
+...     if cols in lkp_cols:
+...             col_index.append(col_list.index(cols))
+
+
+header_out=header.map(lambda x: x.split("|")[f1]+"|"+x.split("|")[f2]+"|Final_Price")
+header_out=col_list.map(lambda x: x.split("|").col_index[0])
+
+
+####
+1) using sc=> sc.textFile('/path').take(1)
+2) using spark=> AttributeError: 'SparkSession' object has no attribute 'textFile'
+3) convert rdd to dataframe using
+	a) rdd.toDF()
+		The toDF() command gives you the way to convert an RDD[Row] to a Dataframe. The point is, the object Row() can receive a **kwargs argument
+		from pyspark.sql.types import Row
+		
+		##I have 38 columns or fields and this will increase further. If I manually give the schema specifying each field information, that it going to be so tedious job
+		## below is create dataframes dynamically.
+		def f(x):
+			d={}
+			for i in range(len(x)):
+				d[str(i)]=x[i]
+			return d
+			
+		df=rdd.map(lambda a: Row(**f(x))).toDF()
+
+	b) spark.createDataFrame(rdd,schema=schema) // here schema=['a']
+		## below is create dataframes dynamically.
+		schema=StructType([StructField(str(i),StringType(),True) for i in range(32)])
+	
+	
+4) When you infer the schema, by default the datatype of the columns is derived from the data and set’s nullable to true for all columns. We can change this behavior by supplying schema using StructType
+
+deptSchema = StructType([       
+    StructField('dept_name', StringType(), True),
+    StructField('dept_id', StringType(), True)
+])
+
+deptDF1 = spark.createDataFrame(rdd, schema = deptSchema)
+
+
+https://sparkbyexamples.com/pyspark/pyspark-structtype-and-structfield/
+
+
+PySpark StructType & StructField classes are used to programmatically specify the schema to the DataFrame and creating complex columns like nested struct, array and map columns. StructType is a collection of StructField’s that defines (column name, column data type, boolean) to specify if the field can be nullable or not and metadata.
+
+PySpark infers a schema from data, some times we may need to define our own column names and data types
+StructType is a collection or list of StructField objects
+
+
+data=[("james","","smith",22)]
+schema=StructType([StructField("firstname",StringType(),True)]) \
+		StructType([StructField("middlename",StringType(),True)]) \
+		StructType([StructField("lastname",StringType(),True)]) \
+		StructType([StructField("age",IntegerType(),True)])
+
+data=[("james","","smith),22)]
+schema=StructType([StructField("name",StructType([StructField('firstname",StringType(),True)]))
+
+
+json_schema={"fields":[{"metadata":{},"name":"fisapplicationid","nullable":true,"type":"string"}
+schemaFromJson = StructType.fromJson(json_schema)
+
+df.withColumn("otherinfo",struct(col("id").alias("identifier")
+								,col("gender").alias("gender")).drop("id","gender")
+								
+########
+
+data=[(1,["test1","test2","test3"])]
+schema=StructType([StructField("id",IntegerType(),True),\
+				   StructField("test",ArrayType(StringType(),True),True) \
+				   ])
+				   
+schema = StructType([StructField("uuid",IntegerType(),True),StructField("test_123",ArrayType(StringType(),True),True)])
+
+join_udf = udf(lambda x: ",".join(x))
+df.withColumn("test_123", join_udf(col("test_123"))).show()
+
+df.withColumn("test_123", concat_ws(",", "test_123")).show()
+
+
+#####
+
+createDataFrame([("Alberto", 2), ("Dakota", 2)], ["Name", "askdaosdka"])
+
+
+#Create input Spark Dataframe
+
+list_data=[["Babu",20],["Raja",8],["Mani",75],["Kalam",100],["Zoin",7],["Kal",53]]
+df1=spark.createDataFrame(list_data,["name","score"])
+df1.show()
+
+
+####
+
+
+>>> lst=["ways","to","create"]
+>>> type(lst)
+<class 'list'>
+>>> sc.parallelize(lst)
+ParallelCollectionRDD[28] at parallelize at PythonRDD.scala:195
+>>> type(sc.parallelize(lst))
+<class 'pyspark.rdd.RDD'>
+>>>
+
+
+>>> rdd4=sc.textFile("/data/dev/rdd.txt")
+>>> type(rdd4)
+<class 'pyspark.rdd.RDD'>
+>>>
+
+https://stackoverflow.com/questions/22350722/what-is-the-difference-between-map-and-flatmap-and-a-good-use-case-for-each
+https://medium.com/@aristo_alex/how-apache-sparks-transformations-and-action-works-ceb0d03b00d0#:~:text=Narrow%20transformations%20are%20the%20result,many%20partitions%20of%20parent%20RDD.
+
+### map and flatmap
+
+rdd=sc.parallelize([2,3,4])
+>>> rdd
+ParallelCollectionRDD[0] at parallelize at PythonRDD.scala:195
+>>> rdd.collect()
+[2, 3, 4]
+
+newrdd=rdd.flatMap(lambda x:range(1,x)).collect()
+>>> newrdd
+[1, 1, 2, 1, 2, 3]
+
+rdd1=rdd.map(lambda x:range(1,x))
+PythonRDD[2] at RDD at PythonRDD.scala:53
+>>> rdd1.collect()
+[range(1, 2), range(1, 3), range(1, 4)]
+
+
+The transformation function:
+map: One element in -> one element out.
+flatMap: One element in -> 0 or more elements out (a collection)
+
+
+
+#### Map ####
+
+val text=sc.textFile("text.txt").map(_.split(" ")).collect
+output:
+
+text: **Array[Array[String]]** = Array(Array(Spark, is, an, expressive, framework)
+									 , Array((This, text, is, to, understand, map, and, faltMap, functions, of, Spark, RDD))
+									 
+##### flatMap ####
+
+val text=sc.textFile("text.txt").flatMap(_.split(" ")).collect
+output:
+
+ text: **Array[String]** = Array(Spark, is, an, expressive, framework, This, text, is, to, understand, map, and, faltMap, functions, of, Spark, RDD)
+ 
+ ### Map and flatMap examples ####
+ 
+ map :It returns a new RDD by applying a function to each element of the RDD.   Function in map can return only one item.
+
+flatMap: Similar to map, it returns a new RDD by applying  a function to each element of the RDD, but output is flattened.
+Also, function in flatMap can return a list of elements (0 or more)
+
+Example1:- 
+sc.parallelize([3,4,5]).map(lambda x: range(1,x)).collect()
+Output:
+[[1, 2], [1, 2, 3], [1, 2, 3, 4]]
+
+sc.parallelize([3,4,5]).flatMap(lambda x: range(1,x)).collect()
+Output:  notice o/p is flattened out in a single list
+[1, 2, 1, 2, 3, 1, 2, 3, 4] 
+
+Example 2:
+
+sc.parallelize([3,4,5]).map(lambda x: [x,  x*x]).collect() 
+Output:
+[[3, 9], [4, 16], [5, 25]]
+
+sc.parallelize([3,4,5]).flatMap(lambda x: [x, x*x]).collect()
+Output: notice flattened list
+[3, 9, 4, 16, 5, 25]
+
+Example 3: 
+There is a file greetings.txt in HDFS with following lines:
+Good Morning
+Good Evening
+Good Day
+Happy Birthday
+Happy New Year
+
+
+lines = sc.textFile("greetings.txt")
+lines.map(lambda line: line.split()).collect()
+Output:-
+[['Good', 'Morning'], ['Good', 'Evening'], ['Good', 'Day'], ['Happy', 'Birthday'], ['Happy', 'New', 'Year']]
+
+
+ lines.flatMap(lambda line: line.split()).collect()
+Output:-
+['Good', 'Morning', 'Good', 'Evening', 'Good', 'Day', 'Happy', 'Birthday', 'Happy', 'New', 'Year']
+
+
+## some more examples ###
+
+map
+
+Return a new RDD by applying a function to each element of this RDD.
+
+>>> rdd = sc.parallelize([2, 3, 4])
+>>> sorted(rdd.map(lambda x: [(x, x), (x, x)]).collect())
+[[(2, 2), (2, 2)], [(3, 3), (3, 3)], [(4, 4), (4, 4)]]
+flatMap
+
+Return a new RDD by first applying a function to all elements of this RDD, and then flattening the results. Here transformation of one element to many element is possible
+
+>>> rdd = sc.parallelize([2, 3, 4])
+>>> sorted(rdd.flatMap(lambda x: [(x, x), (x, x)]).collect())
+[(2, 2), (2, 2), (3, 3), (3, 3), (4, 4), (4, 4)]
+
+
+
+
+	

@@ -1,0 +1,200 @@
+Optimal way to check if dataframe is empty
+Use the head function in place of count.
+
+df.head(1).isEmpty
+Above is efficient because to find whether a dataframe is empty or not, all you need to know is whether the dataframe has at least one record or not.
+
+Note that head() on an empty dataframe will result in java.util.NoSuchElementException exception. So make sure to use head(1).
+
+######
+
+Hive warehouse location
+Check the warehouse directory for files stored in Hive tables.
+
+<property>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>/warehouse/tablespace/managed/hive</value>
+  </property>
+
+
+/warehouse/tablespace/managed/hive/racq21.db/rt_apd_ar_mstr_dp_rd/full_date=20190202
+
+To see the content of your ORC file in plain text you can invoke the command with -d option:
+
+[@localhost ~ ]$ hive --orcfiledump -d <path to HDFS ORC file>;
+
+[etladmin@vlmazrasdev1ap1 ~]$ hive --orcfiledump -d /warehouse/tablespace/managed/hive/racq21.db/rt_apd_ar_mstr_dp_rd/full_date=20190202/delta_0000206_0000206_0000/000000_0
+
+
+
+######
+
+https://www.hadoopinrealworld.com/what-is-the-difference-between-explode-and-lateral-view-explode-in-hive/
+Lateral view is used in conjunction with user-defined table generating functions such as explode(). A UDTF generates zero or more output rows for each input row
+
+#####
+
+datediff function in Hive takes 2 dates in String type and gives you the difference between the dates.
+
+datediff(string enddate, string startdate)
+
+
+#####
+
+regexp_replace(string INITIAL_STRING, string PATTERN, string REPLACEMENT):
+
+#####
+
+A Spark application can have many jobs. A job can have many stages. A stage can have many tasks. A task executes a series of instructions.
+
+#####
+
+https://www.hadoopinrealworld.com/why-do-i-see-200-tasks-in-spark-execution/
+
+#####
+
+show columns in employee;
+
+#####
+
+https://www.hadoopinrealworld.com/how-does-spark-decide-stages-and-tasks-during-execution-of-a-job/
+https://www.hadoopinrealworld.com/how-does-spark-decide-the-number-of-tasks-and-number-of-tasks-to-execute-in-parallel/
+
+####
+
+foreach() is an action and action functions are the right location to use accumulators
+
+#####
+
+bin/kafka-consumer-groups.sh --list --bootstrap-server <kafka-broker>:9092
+bin/kafka-consumer-groups --bootstrap-server <kafka-broker>:9092 --describe --group sample-consumer-group
+
+
+######
+
+https://www.hadoopinrealworld.com/what-does-stage-skipped-mean-in-apache-spark-web-ui/
+
+
+#####
+
+https://www.hadoopinrealworld.com/can-multiple-kafka-consumers-read-the-same-message-from-a-partition/
+https://www.hadoopinrealworld.com/what-is-consumer-offset-and-the-purpose-of-consumer-offset-in-kafka/
+
+A topic can be consumed by many consumer groups and each consumer group will have many consumers
+
+
+####
+
+dupes = df1.groupBy("value").count.filter("count > 1")
+
+
+#####
+
+User Defined Table generating Function (UDTF)
+UDTFs operate on single rows and produce multiple rows as output.
+
+Functions like explode(Array), posexplode(Array) are examples of UDTFs.
+
+
+####
+
+ALTER TABLE <table-name> CHANGE <old-col-name> <new-col-name> <data-type>;
+ALTER TABLE  TB_APD_AR_CNTR_PERIOD_DP_RD CHANGE CNTRPRD_FILLER_DESC1 AACDP_EFCTV_DATE STRING;
+
+####
+
+https://www.hadoopinrealworld.com/what-is-the-difference-between-groupbykey-and-reducebykey-in-spark/
+
+
+###
+
+https://www.hadoopinrealworld.com/how-to-send-large-messages-in-kafka/
+
+####
+
+Create Table As Select (CTAS)
+A table named newtable will be created with the same structure as oldtable and all records from oldtable will also be copied to the newtable. 
+
+load data local inpath '/home/hirw/localdirectory' 
+overwrite into table sales;
+
+###
+
+HDFS divides the files into blocks and stores the blocks locally in datanodes. The location varies from cluster to cluster based on the configuration in hdfs-site.xml
+
+dfs.datanode.data.dir
+dfs.datanode.data.dir  in hdfs-site.xml file dictates the directory location where the blocks will be stored in the local file system in the individual datanode
+
+####
+
+With LEFT SEMI JOIN, we get only the first matching record in the left hand side table in the output. As soon as a match is hit, the join will move to the next e_id.
+
+
+LEFT SEMI JOIN is similar to the EXISTS query below
+
+SELECT name FROM employee e 
+WHERE EXISTS (SELECT * FROM employee_department_mapping d WHERE (e.e_id=b.d_id))
+
+####
+
+create external table employee (id int, name string) 
+lines terminated by '\n' 
+location '/user/hirw/employees’ 
+tblproperties ("skip.header.line.count"="1");
+
+###
+
+og4j.properties controls the log related configuration settings. You can find this file under $SPARK_HOME/conf/log4j.properties
+
+There are several log levels in log4j –OFF, FATAL, ERROR, WARN, INFO, DEBUG, TRACE, ALL . FATAL will list only FATAL messages. ERROR level will list only ERROR and FATAL messages. ALL will list all log messages.
+
+You will see log4j.rootCategory=INFO , console in log4j.properties files for Spark. This means you will see all log messages from INFO, WARN, ERROR and FATAL. If you want to only see ERROR and FATAL messages change this property to log4j.rootCategory=ERROR , console.
+
+spark.sparkContext.setLogLevel("ERROR")
+
+####
+df=df.fillna("")
+
+####
+
+df1.createOrReplaceTempView("outbox_df")
+inbox_df.createOrReplaceTempView('inbox_df')
+
+compare_qry = "select outbox_df.* from outbox_df left anti join inbox_df on outbox_df.cdceo_id = inbox_df.cdceo_id"
+left anti join used to get non-matching records from left table
+leftanti join does the exact opposite of the leftsemi join
+
+
+### Important ####
+
+TypeError: Can not infer schema for type: <class 'str'>
+
+1) Spark.createDataFrame, which is used under the hood, requires an RDD / list of Row/tuple/list/dict* or pandas.DataFrame, unless schema with DataType is provided
+2) Convert to Row or provide schema directly
+
+from pyspark.sql.types import Row
+>>>
+>>>
+>>> lst=map(lambda x : Row(x),data) # data=[("0"),("1")]
+>>> lst
+>>> df=spark.createDataFrame(lst,["flag"])
+>>> df.show()
++----+
+|flag|
++----+
+|   0|
+|   1|
++----+
+
+
+OR
+
+
+df=spark.createDataFrame(data,StringType())
+>>> df.show()
++-----+
+|value|
++-----+
+|    0|
+|    1|
++-----+

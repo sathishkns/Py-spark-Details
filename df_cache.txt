@@ -1,0 +1,10 @@
+dfpar=spark.read.parquet('/data/perf10m/userdata1.parquet')
+dfpar.withColumn("file_name",input_file_name()).select("file_name").distinct().show()
+
+dfpar1=spark.read.parquet('/data/perf10m/userdata1.parquet')
+dfpar1=dfpar1.cache()
+dfpar1.withColumn("file_name",input_file_name()).select("file_name").distinct().show()
+
+
+
+

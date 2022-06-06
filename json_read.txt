@@ -1,0 +1,17 @@
+### json read from schema ###
+
+1) get schema details from json using df.schema.json()
+2) Then use json.loads and pass that schema details
+3) Finally get the json details using StructType
+
+json_data=df.schema.json()
+json_schema=json.loads(json_data)
+final_schema=StructType.fromJson(json_schema)
+
+
+import json
+final_schema = StructType.fromJson(json.loads(schema.json))
+df3 = spark.createDataFrame(spark.sparkContext.parallelize(structureData),schemaFromJson)
+df3.printSchema()
+
+df1=df_others.withColumn("jsonData",from_json(col("value").cast("string"),schemaFromJson))
