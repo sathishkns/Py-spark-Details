@@ -1,0 +1,19 @@
+Structure for /warehouse/tablespace/managed/hive/racp21.db/rt_ar_dly_bal_dp_rd/full_date=20271129/delta_0000023_0000023_0000/000000_0
+File Version: 0.12 with ORC_135
+Rows: 49945
+Compression: ZLIB
+Compression size: 65536
+Type: struct<ldbid:int,ar_id_item:string>
+
+data = sqlContext.sql("SELECT * FROM orc.`<HDFS_path>`");
+data.printSchema()
+
+val df=spark.read.option("header","true").orc("/DATA/UNIVERSITY/DEPT/STUDENT/part-00000.orc")
+
+df.printSchema()
+
+https://stackoverflow.com/questions/61305838/on-hdfs-i-want-to-display-normal-text-for-a-hive-table-stored-in-orc-format
+
+To see the content of your ORC file in plain text you can invoke the command with -d option:
+
+[@localhost ~ ]$ hive --orcfiledump -d <path to HDFS ORC file>;
