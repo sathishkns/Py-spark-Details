@@ -1,0 +1,19 @@
+#DataLake 
+  is repository or storage just like a container 📦 where all your structured, semi structured and unstructured data are captured from various source systems. 
+  The Data from data lake is then moved to #DWH for further processing and transformations to drive business analytics.
+
+Data Lakes has few drawbacks such as:
+
+1) missing Acid properties: multiple people cannot delete, insert or update data at a time.
+2) lack of schema evolution
+3) lack of data quality as data types are different.
+4) Lack of consistency.
+
+Hence there should be something which can solve these issues? #deltalake can solve all these issues.
+
+So what is #DeltaLake
+Delta lake is open source storage layer that brings ACID transactions to Apache Spark. 
+These are technologies built on top of DataLake and supports Parquet format, schema evolution, upserts and inserts. 
+Delta lake provides scalable meta data handling as well. 
+It supports time travel as well to see the history data with time stamps. 
+It supports both batch & streaming jobs as well.
