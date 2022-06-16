@@ -47,6 +47,14 @@ To see the content of your ORC file in plain text you can invoke the command wit
 
 [etladmin@vlmazrasdev1ap1 ~]$ hive --orcfiledump -d /warehouse/tablespace/managed/hive/racq21.db/rt_apd_ar_mstr_dp_rd/full_date=20190202/delta_0000206_0000206_0000/000000_0
 
+### execute query from hive terminal ##
+
+hive shell
+hive --service beeline --silent=true -n etladmin@fisdev.local -p C1oUd@utomatat3768 -e  "use racx12; select cdceo_ldbid,cdceo_payload,prcs_date from RT_CDC_EVENT_INBOX_DP_RD where evt_type='com.fis.deposits.monetary_transaction.1_0_0';" > /data2/ras/sathishNS/cdc_hive_out.txt
+
+# run hql file in beeline terminal
+
+hive --service beeline --silent=true -n etladmin@fisdev.local -p C1oUd@utomatat3768 --outputformat=csv2 --silent=true -f query.hql >output1.txt
 
 
 ######
